@@ -31,7 +31,7 @@ Choose Content Type: Select the type of content you wish to extract (HTML, JavaS
 View and Download: Scraped content will display in the interface with a download option for each type.
 
 
-#file path
+#FILE PATH
 ##
 web-scraper/
 ## 
