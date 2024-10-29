@@ -14,9 +14,7 @@ A powerful Node.js web scraper that allows users to extract and interact with HT
 
 ## Installation
 
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
+1. open cmd redirect to web-scraper
    cd web-scraper
 2. Install Dependencies
 Install the necessary packages by running:
