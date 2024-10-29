@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            padding: 2rem;
+        }
+
+        h1 {
+            color: #bb86fc;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        #scrapeForm {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .url-input {
+            margin-bottom: 1.5rem;
+        }
+
+        label[for="url"] {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        #url {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #333;
+            border-radius: 6px;
+            font-size: 1rem;
+            color: #e0e0e0;
+            background: #2a2a2a;
+            transition: border-color 0.3s;
+        }
+
+        #url:focus {
+            outline: none;
+            border-color: #bb86fc;
+        }
+
+        .content-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .content-option {
+            background: #333;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            color: #e0e0e0;
+            border: 2px solid transparent;
+        }
+
+        .content-option.selected {
+            background: #bb86fc;
+            color: white;
+            border-color: #3700b3;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 1rem;
+            background: #bb86fc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background: #7c4dff;
+        }
+
+        #results {
+            margin-top: 2rem;
+        }
+
+        #results h2 {
+            color: #bb86fc;
+            margin: 1.5rem 0 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 2px solid #333;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        a.download-link {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #4a4a4a;
+            color: #bb86fc;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            transition: background 0.3s;
+        }
+
+        a.download-link:hover {
+            background: #3700b3;
+        }
+
+        #responseMessage {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .success {
+            background: #388e3c;
+            color: #ffffff;
+        }
+
+        .error {
+            background: #b00020;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Web Scraper</h1>
+    <form id="scrapeForm">
+        <div class="url-input">
+            <label for="url">Enter the URL:</label>
+            <input type="text" id="url" name="url" required>
+        </div>
+
+        <p>Select content type to scrape (one at a time):</p>
+        <div class="content-types">
+            <div class="content-option" data-value="html">HTML</div>
+            <div class="content-option" data-value="css">CSS</div>
+            <div class="content-option" data-value="js">JavaScript</div>
+            <div class="content-option" data-value="img">Images</div>
+            <div class="content-option" data-value="video">Videos</div>
+            <div class="content-option" data-value="txt">Text</div>
+        </div>
+
+        <button type="submit">Scrape</button>
+    </form>
+
+    <div id="results"></div>
+    <p id="responseMessage"></p>
+
+    <script>
+        const contentOptions = document.querySelectorAll('.content-option');
+        let selectedContentType = null;
+
+        contentOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                contentOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedContentType = option.dataset.value;
+            });
+        });
+
+        document.getElementById('scrapeForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (!selectedContentType) {
+                document.getElementById('responseMessage').textContent = 'Please select a content type';
+                document.getElementById('responseMessage').className = 'error';
+                return;
+            }
+
+            const url = document.getElementById('url').value;
+            const contentTypes = [selectedContentType];
+
+            const response = await fetch('/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url, contentTypes })
+            });
+
+            const result = await response.json();
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.textContent = result.message || result.error;
+            responseMessage.className = result.error ? 'error' : 'success';
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (result.results) {
+                if (selectedContentType === 'html') {
+                    resultsDiv.innerHTML += `<h2>HTML Content</h2><textarea rows="10" cols="100">${result.results.html}</textarea>`;
+                    resultsDiv.innerHTML += `<a class="download-link" href="data:text/html;charset=utf-8,${encodeURIComponent(result.results.html)}" download="index.html">Download HTML</a><br>`;
+                } else if (selectedContentType === 'txt') {
+                    resultsDiv.innerHTML += `<h2>Text Content</h2><textarea rows="10" cols="100">${result.results.text}</textarea>`;
+                    resultsDiv.innerHTML += `<a class="download-link" href="data:text/plain;charset=utf-8,${encodeURIComponent(result.results.text)}" download="text.txt">Download Text</a><br>`;
+                } else if (selectedContentType === 'css') {
+                    result.results.css.forEach((cssContent, index) => {
+                        resultsDiv.innerHTML += `<h2>CSS Content ${index + 1}</h2><textarea rows="10" cols="100">${cssContent}</textarea>`;
+                        resultsDiv.innerHTML += `<a class="download-link" href="data:text/css;charset=utf-8,${encodeURIComponent(cssContent)}" download="style${index + 1}.css">Download CSS ${index + 1}</a><br>`;
+                    });
+                } else if (selectedContentType === 'js') {
+                    result.results.js.forEach((jsContent, index) => {
+                        resultsDiv.innerHTML += `<h2>JavaScript Content ${index + 1}</h2><textarea rows="10" cols="100">${jsContent}</textarea>`;
+                        resultsDiv.innerHTML += `<a class="download-link" href="data:text/javascript;charset=utf-8,${encodeURIComponent(jsContent)}" download="script${index + 1}.js">Download JS ${index + 1}</a><br>`;
+                    });
+                } else if (selectedContentType === 'img') {
+                    resultsDiv.innerHTML += `<h2>Image Links</h2>`;
+                    result.results.images.forEach((imgSrc, index) => {
+                        resultsDiv.innerHTML += `<a class="download-link" href="${imgSrc}" target="_blank" download="image${index + 1}.jpg">Image ${index + 1}</a><br>`;
+                    });
+                } else if (selectedContentType === 'video') {
+                    resultsDiv.innerHTML += `<h2>Video Links</h2>`;
+                    result.results.videos.forEach((videoSrc, index) => {
+                        resultsDiv.innerHTML += `<a class="download-link" href="${videoSrc}" target="_blank" download="video${index + 1}.mp4">Video ${index + 1}</a><br>`;
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
