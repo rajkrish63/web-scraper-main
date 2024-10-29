@@ -14,7 +14,7 @@ A powerful Node.js web scraper that allows users to extract and interact with HT
 
 ## Installation
 
-1. open cmd redirect to web-scraper
+1. open cmd redirect to web-scraper:
    cd web-scraper
 2. Install Dependencies
 Install the necessary packages by running:
@@ -31,14 +31,13 @@ Choose Content Type: Select the type of content you wish to extract (HTML, JavaS
 View and Download: Scraped content will display in the interface with a download option for each type.
 
 
-
+##file path
 web-scraper/
 ├── public/
-│   └── index.html       # Main HTML file
-├── scraper.js          # Main server and scraper logic
-├── package.json         # Project metadata and dependencies
-└── README.md            # Project documentation
-
---- 
+│   └── index.html       
+├── scraper.js         
+├── package.json         
+└── README.md            
+ 
 
 This **README** provides a full overview, clear installation instructions, and a structured outline for usage, making it easy for users and collaborators to understand and work with the project.
